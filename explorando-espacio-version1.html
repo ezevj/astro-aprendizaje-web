@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Aprendizaje para Todos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F3F4F6; 
+            color: #1F2937; 
+        }
+        .section-title { 
+            font-weight: 900; 
+            letter-spacing: 0.05em; 
+            transition: text-shadow 0.3s ease; 
+            position: relative;
+            padding-left: 35px; 
+            margin-bottom: 2.5rem; 
+        }
+        .section-title::before { 
+            content: ''; display: inline-block; width: 25px; height: 5px;
+            background-color: #FBBF24; border-radius: 3px;
+            position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        }
+        .section-title:hover { text-shadow: 0 0 10px rgba(129, 201, 255, 0.7); }
+        .header-main-title { cursor: pointer; transition: color 0.3s ease; }
+        .header-main-title:hover { color: #FDE047; }
+
+        .space-bg-deep { background-color: #0B1120; position: relative; overflow: hidden; }
+        .space-bg-deep::before {
+            content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+            background-image: radial-gradient(white 0.5px, transparent 0.5px), radial-gradient(white 0.5px, transparent 0.5px);
+            background-size: 50px 50px, 150px 150px;
+            background-position: 0 0, 25px 25px;
+            animation: moveStarfield 120s linear infinite;
+            opacity: 0.1;
+        }
+        @keyframes moveStarfield { from {background-position: 0 0, 25px 25px;} to {background-position: 500px 1000px, 525px 1025px;} }
+
+        .space-bg-medium { background-color: #1E3A8A; }
+        .space-bg-purple { background-color: #281E3A; }
+
+        .particle { position: absolute; background-color: white; border-radius: 50%; opacity: 0; animation: sparkle linear infinite; cursor:pointer; transition: transform 0.2s, opacity 0.2s; }
+        .particle:hover { transform: scale(1.5) !important; opacity: 1 !important; }
+        @keyframes sparkle { 0%, 100% { opacity: 0; transform: scale(0.5) translateY(0); } 50% { opacity: 0.8; transform: scale(1) translateY(-20px); } }
+        @keyframes sparkle-click { 0% { opacity:1; transform: scale(2.5) rotate(0deg); box-shadow: 0 0 15px white; } 100% { opacity:0; transform: scale(0.5) rotate(180deg); box-shadow: none;} }
+
+        .content-card { background-color: rgba(255, 255, 255, 0.95); border-radius: 1.25rem; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .dark-theme-card { background-color: rgba(30, 41, 59, 0.9); color: #F3F4F6; border: 1px solid #4B5563; } 
+        
+        .constellation-info-card { 
+            background-color: rgba(40, 20, 60, 0.85); border: 2px solid #c084fc; 
+            border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; color: #e9d5ff; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .constellation-info-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3); }
+        .constellation-info-card h4 { color: #facc15; font-size: 1.75rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .constellation-info-card .constellation-symbol { font-size: 2.5rem; margin-right: 0.5rem; color: #fde047; }
+        .constellation-info-card p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.5rem; }
+        .constellation-info-card strong { color: #f9a8d4; }
+
+        .planet-visual-box { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 1rem auto; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 0 15px rgba(255,255,255,0.1); transition: transform 0.4s ease-out; }
+        .planet-visual-box:hover { transform: scale(1.1) rotateZ(5deg); }
+        .planet-card-visual { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0.5rem auto; position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .planet-sol { background: radial-gradient(ellipse at center, #FFFACD 20%, #FFD700 60%, #FFA500 100%); }
+        .planet-sol::before { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; background: repeating-radial-gradient(transparent, transparent 5px, rgba(255,200,0,0.1) 6px, rgba(255,200,0,0.1) 7px); animation: pulse-slow 3s infinite; }
+        @keyframes pulse-slow { 0% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.7; } }
+        .planet-mercurio { background: #A9A9A9; }
+        .planet-mercurio::after { content: ''; position: absolute; width: 8px; height: 8px; background: #708090; border-radius: 50%; box-shadow: 10px 15px 0 #708090, -8px -20px 0 #708090, 15px -8px 0 #696969; }
+        .planet-venus { background: linear-gradient(145deg, #FFF8DC, #FFEFD5, #FFE4B5); }
+        .planet-venus::before { content: ''; position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(-45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 8px, rgba(255,248,220,0.05) 8px, rgba(255,248,220,0.05) 16px); animation: swirl 10s linear infinite; }
+        @keyframes swirl { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .planet-tierra { background: #4682B4; }
+        .planet-tierra .landmass { position: absolute; width: 60%; height: 40%; background: #2E8B57; border-radius: 40% 60% 70% 30% / 30% 50% 70% 50%; transform: rotate(20deg) translate(10px, 5px); opacity:0.8; }
+        .planet-tierra .clouds { position: absolute; width:120%; height:120%; background: repeating-linear-gradient(60deg, transparent, transparent 10px, rgba(255,255,255,0.08) 10px, rgba(255,255,255,0.08) 20px); opacity:0.5; animation: swirl 15s linear infinite; border-radius:50%;}
+        .planet-luna { background: #D3D3D3; }
+        .planet-luna::after { content: ''; position: absolute; width: 10px; height: 10px; background: #A9A9A9; border-radius: 50%; box-shadow: 15px 20px 0 #A9A9A9, -10px -15px 0 #BEBEBE, 20px -10px 0 #A9A9A9; }
+        .planet-marte { background: #CD5C5C; }
+        .planet-marte .polar-cap { position:absolute; top:5%; left:50%; transform:translateX(-50%); width:30%; height:15%; background:rgba(255,255,255,0.7); border-radius: 50% / 0 0 100% 100%; }
+        .planet-jupiter { background: #FFDEAD; position: relative; }
+        .planet-jupiter .band-1 { position:absolute; width:100%; height:20%; background:rgba(210,180,140,0.6); top: 25%; }
+        .planet-jupiter .band-2 { position:absolute; width:100%; height:15%; background:rgba(245,222,179,0.6); top: 55%; }
+        .planet-jupiter .great-red-spot { position:absolute; width:25%; height:18%; background: #B22222; border-radius:50%; top:40%; left:30%; opacity:0.7; transform: rotate(-15deg); }
+        .planet-saturno { background: #F0E68C; }
+        .planet-saturno .rings { content:''; position:absolute; width:160%; height:25%; border:8px solid rgba(210,180,140,0.6); border-radius:50%; top:37%; left:-30%; transform: rotateX(70deg) rotateZ(-5deg); box-sizing:border-box; }
+        .planet-urano { background: #AFEEEE; }
+        .planet-urano .rings-faint { content:''; position:absolute; width:110%; height:10%; border:3px solid rgba(64,224,208,0.4); border-radius:50%; top:45%; left:-5%; transform: rotateX(80deg) rotateZ(10deg) skewY(45deg); }
+        .planet-neptuno { background: #1E90FF; }
+        .planet-neptuno .dark-spot { position:absolute; width:18%; height:18%; background:rgba(0,0,205,0.4); border-radius:50%; top:30%; left:60%; }
+
+        .celestial-body-card-v12 { 
+            background: linear-gradient(145deg, #2c3e50, #34495e); color: white; border: none; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); 
+            transition: transform 0.3s, box-shadow 0.3s, border 0.3s; 
+            height: 260px; display: flex; flex-direction: column; justify-content: space-between;
+            border: 2px solid transparent;
+        }
+        .celestial-body-card-v12:hover { 
+            transform: translateY(-10px) scale(1.03); 
+            box-shadow: 0 15px 25px rgba(0,0,0,0.5), 0 0 20px #FDE047;
+            border-color: #FDE047;
+        }
+        .celestial-body-card-v12 .planet-name { font-weight: 700; font-size: 1.25rem; color: #FDE047; margin-top:0.25rem; }
+        .celestial-body-card-v12 .planet-text-preview { font-size:0.75rem; opacity:0.8; margin-bottom:0.5rem; flex-grow:1; overflow:hidden; text-overflow:ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;  }
+
+        #celestialBodyDetailModal_v12 .modal-content { background: linear-gradient(160deg, #1c2538, #2a3b57); color: white; border-radius: 1rem; padding: 2rem; border: 2px solid #FBBF24; }
+        #celestialBodyDetailModal_v12 #modalTitle_v12 { color: #FBBF24; }
+        #celestialBodyDetailModal_v12 #modalExtraFact_v12 { background-color: rgba(251, 191, 36, 0.1); border-left: 4px solid #FBBF24; color: #FEF3C7;}
+
+        #creatorCanvas_v12 { width:100%; height:100%; /* Fill parent div */ background-color: #0f172a; border-radius: 0.5rem; cursor: crosshair; display:block; }
+        
+        .game-hub-card { background: linear-gradient(to right bottom, #8B5CF6, #EC4899); color: white; transition: transform 0.3s, box-shadow 0.3s; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .game-hub-card:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 15px #EC4899; }
+        .game-section { padding: 2rem; border-radius: 1rem; margin-top: 2rem; }
+        #gameAdivinaPlanet_v12.game-section { background: linear-gradient(135deg, #FBBF24, #F87171); }
+        #gameOrdenaPlanetas_v12.game-section { background: linear-gradient(135deg, #34D399, #60A5FA); }
+        #gameMemoryEspacial_v12.game-section { background: linear-gradient(135deg, #fbbf24, #f97316); } 
+        #gameCreaConstelacion_v12.game-section { background: linear-gradient(135deg, #7DD3FC, #F0ABFC); } 
+
+        .game-question-text { font-size: 1.5rem; font-weight: 700; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .game-option-button { background-color: rgba(255,255,255,0.8); color: #374151; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; transition: background-color 0.2s, transform 0.2s; border: 2px solid transparent; }
+        .game-option-button:hover { background-color: white; transform: translateY(-2px); border-color: #FBBF24; }
+        .game-feedback { font-size: 1.25rem; font-weight: 700; padding: 0.75rem; border-radius: 0.5rem; text-align: center; }
+
+        .nav-button-main { background-color: #FBBF24; color: #78350F; font-weight: 700; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.3s, transform 0.2s; }
+        .nav-button-main:hover { background-color: #FDE047; transform: scale(1.05); }
+        .nav-button-main.active { background-color: #D97706; color: white; }
+
+        .section-nav-button { background-color: #8B5CF6; color: white; font-weight: 700; }
+        .section-nav-button:hover { background-color: #7C3AED; }
+
+        .rocket-animation { transition: transform 2s ease-in-out, opacity 1.5s ease-in-out; }
+
+        .planet-order-option-v12 { cursor: pointer; padding: 0.5rem; margin: 0.25rem; border-radius: 0.75rem; border: 2px solid rgba(255,255,255,0.5); background-color: rgba(255,255,255,0.2); color: white; font-weight: 700; transition: background-color 0.2s, border-color 0.2s; display: flex; flex-direction: column; align-items: center; width: 130px; min-height:130px; justify-content:center; }
+        .planet-order-option-v12:hover { background-color: rgba(255,255,255,0.4); border-color: white; }
+        
+        .selected-order-item-v12 { background-color: #FBBF24 !important; color: #78350F !important; border-color: #F59E0B !important; }
+        .hidden { display: none; }
+
+        .creator-tool-button { background-color: #FBBF24; color: #78350F; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight:bold; margin: 0.25rem; }
+        .creator-tool-button:hover { background-color: #FDE047; }
+        .creator-tool-button.active { background-color: #D97706; color:white; }
+
+        /* Memory Game Styles */
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; max-width: 460px; margin: 1rem auto; }
+        @media (max-width: 500px) { .memory-grid { grid-template-columns: repeat(3, 1fr); max-width: 340px; } }
+        .memory-card {
+            width: 100px; height: 100px; background-color: #4A5568;
+            border-radius: 0.5rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; color: transparent; 
+            perspective: 1000px; transition: transform 0.6s, background-color 0.3s; transform-style: preserve-3d;
+            border: 2px solid #2D3748;
+        }
+        .memory-card .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; align-items: center; justify-content: center; border-radius: 0.5rem;
+        }
+        .memory-card .card-front { transform: rotateY(180deg); background-color: #E2E8F0; color: #2D3748; }
+        .memory-card .card-back { background: linear-gradient(135deg, #60A5FA, #3B82F6); color: #DBEAFE; }
+        .memory-card.is-flipped { transform: rotateY(180deg); }
+        .memory-card.is-matched { transform: rotateY(180deg) scale(0.95); background-color: #6EE7B7 !important; border-color: #34D399 !important; cursor: default; opacity: 0.8; }
+        .memory-card.is-matched .card-front { background-color: #A7F3D0; } 
+
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <header class="sticky top-0 z-50 bg-sky-700 shadow-xl">
+        <nav class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <h1 id="headerTitle_v12" class="text-2xl md:text-3xl font-black text-yellow-300 tracking-wider header-main-title">🚀 Astro Aprendizaje para Todos 🌌</h1>
+            <div id="mainNavLinks_v12" class="space-x-1 md:space-x-2">
+                <button data-target="intro_v12" class="nav-button-main">Inicio</button>
+                <button data-target="vecindario_v12" class="nav-button-main">Sistema Solar</button>
+                <button data-target="masAlla_v12" class="nav-button-main">Estrellas y Constelaciones</button>
+                <button data-target="actividades_hub_v12" class="nav-button-main">Juegos</button>
+                <button data-target="despedida_v12" class="nav-button-main">Adiós</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-2 md:p-4">
+        <section id="intro_v12" class="section-content min-h-screen flex flex-col items-center justify-center text-center space-bg-deep text-white p-6 rounded-lg shadow-2xl">
+            <div id="introParticles_v12" class="absolute inset-0"></div>
+            <div class="z-10">
+                <h2 id="mainPageTitle_v12" class="text-5xl md:text-7xl section-title text-sky-300 animate-pulse">¡Bienvenidos, Astroexploradores!</h2>
+                <p class="mt-6 text-xl md:text-2xl text-slate-200">¡Prepárense para un viaje ALUCINANTE por el cosmos! ¿Listos para descubrir los secretos del universo?</p>
+                <div id="rocketContainer_v12" class="mt-10 text-7xl md:text-9xl cursor-pointer rocket-animation hover:animate-wiggle">🚀</div>
+                <button onclick="launchRocket_v12()" class="mt-8 px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl text-2xl shadow-lg transition-transform hover:scale-110 ring-2 ring-pink-300 hover:ring-4">
+                    ¡DESPEGAR!
+                </button>
+                <p id="rocketMessage_v12" class="mt-4 text-md text-slate-400">(Haz clic en el cohete o el botón para iniciar la aventura)</p>
+            </div>
+            <button onclick="navigateToSection_v12('vecindario_v12')" class="section-nav-button absolute bottom-10 right-10 px-4 py-2 rounded-lg text-lg">Siguiente: Sistema Solar &rarr;</button>
+        </section>
+
+        <section id="vecindario_v12" class="section-content hidden min-h-screen py-16 px-4 space-y-10 space-bg-medium text-white rounded-lg shadow-2xl relative">
+            <h2 class="text-4xl md:text-5xl section-title text-center text-yellow-300">Nuestro Vecindario Cósmico</h2>
+            <p class="text-center text-lg md:text-xl text-sky-100 max-w-3xl mx-auto mb-10">Aquí es donde vivimos, ¡en el Sistema Solar! Está lleno de planetas asombrosos, lunas misteriosas y una estrella gigante: el Sol. ¡Vamos a conocerlos más de cerca!</p>
+            <div class="text-center mb-12">
+                <h3 class="text-2xl font-bold text-amber-300 mb-2">¿Qué es la Astronomía? 🔭</h3>
+                <p class="text-md text-slate-200 max-w-2xl mx-auto bg-black bg-opacity-20 p-3 rounded-lg">La astronomía es la ciencia superdivertida que estudia los planetas, las estrellas, las galaxias... ¡todo lo que hay más allá de la Tierra! Es como ser un detective del espacio.</p>
+            </div>
+            <div id="celestialBodiesContainer_v12" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-10 p-4">
+                </div>
+            <div id="celestialBodyDetailModal_v12" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[100]">
+                <div class="modal-content max-w-lg w-full relative animate-jump-in">
+                    <button onclick="closeModal_v12()" class="absolute top-3 right-4 text-yellow-300 hover:text-yellow-500 text-4xl font-bold">&times;</button>
+                    <h3 id="modalTitle_v12" class="text-3xl font-bold mb-4 text-center"></h3>
+                    <div id="modalImage_v12" class="planet-visual-box">
+                        <div class="landmass"></div> <div class="clouds"></div> <div class="polar-cap"></div> <div class="band-1"></div> <div class="band-2"></div> <div class="great-red-spot"></div> <div class="rings"></div> <div class="rings-faint"></div> <div class="dark-spot"></div>
+                    </div>
+                    <p id="modalText_v12" class="mb-4 text-lg leading-relaxed"></p>
+                    <button id="modalExtraFactButton_v12" onclick="revealExtraFact_v12()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-4 rounded-lg text-lg mb-3 transition-transform hover:scale-105">Dato Extra Curioso 💡</button>
+                    <p id="modalExtraFact_v12" class="hidden p-4 rounded-md text-md"></p>
+                    <p id="modalInteractionHint_v12" class="text-xs text-yellow-200 mt-5 text-center opacity-75"></p>
+                </div>
+            </div>
+            <div class="flex justify-between absolute bottom-10 left-10 right-10">
+                <button onclick="navigateToSection_v12('intro_v12')" class="section-nav-button px-4 py-2 rounded-lg text-lg">&larr; Inicio</button>
+                <button onclick="navigateToSection_v12('masAlla_v12')" class="section-nav-button px-4 py-2 rounded-lg text-lg">Siguiente: Estrellas &rarr;</button>
+            </div>
+        </section>
+
+        <section id="masAlla_v12" class="section-content hidden min-h-screen py-16 px-4 space-y-10 space-bg-purple text-white rounded-lg shadow-2xl relative">
+            <h2 class="text-4xl md:text-5xl section-title text-center text-pink-300">Estrellas y Constelaciones</h2>
+            <p class="text-center text-lg md:text-xl text-purple-100 max-w-3xl mx-auto mb-10">El universo está lleno de estrellas brillantes. ¡Algunas forman dibujos llamados constelaciones, que cuentan historias antiguas y nos ayudan a ubicarnos!</p>
+            <div class="dark-theme-card p-6 rounded-xl mb-12">
+                <h3 class="text-3xl font-bold text-pink-400 mb-3 text-center">¡Un Mar de Estrellas! ⭐</h3>
+                <p class="mt-3 text-md text-purple-200 mb-4 text-center">Las estrellas son como soles lejanos. Brillan porque están muy calientes. ¡Hay miles de millones y forman galaxias!</p>
+                <div id="interactiveStarsContainer_v12" class="h-64 sm:h-80 relative border-2 border-pink-400 rounded-lg p-4 flex flex-wrap justify-center items-center gap-4 overflow-hidden bg-black bg-opacity-20">
+                    </div>
+                <p class="mt-3 text-sm text-pink-300 text-center">(Haz clic en las estrellas para ver su magia)</p>
+            </div>
+            <h3 class="text-3xl font-bold text-yellow-300 text-center mt-10 mb-8">Conoce Algunas Constelaciones Famosas</h3>
+            <div id="constellationInfoCardsContainer_v12" class="grid md:grid-cols-1 lg:grid-cols-2 gap-8 px-2 sm:px-4">
+                </div>
+            <div class="flex justify-between absolute bottom-10 left-10 right-10">
+                <button onclick="navigateToSection_v12('vecindario_v12')" class="section-nav-button px-4 py-2 rounded-lg text-lg">&larr; Sistema Solar</button>
+                <button onclick="navigateToSection_v12('actividades_hub_v12')" class="section-nav-button px-4 py-2 rounded-lg text-lg">Siguiente: Juegos &rarr;</button>
+            </div>
+        </section>
+
+        <section id="actividades_hub_v12" class="section-content hidden min-h-screen py-16 px-4 space-y-10 bg-slate-200 rounded-lg shadow-2xl relative">
+            <h2 class="text-4xl md:text-5xl section-title text-center text-purple-600">¡A Jugar y Aprender, Astronauta!</h2>
+            <p class="text-center text-lg md:text-xl text-slate-700 max-w-3xl mx-auto mb-10">¡Es hora de la diversión! Pon a prueba tus conocimientos espaciales con estos juegos interactivos o crea tu propia maravilla celestial. ¿Estás listo para el desafío?</p>
+            <div class="grid md:grid-cols-2 gap-8 md:gap-10 mt-8"> 
+                <div onclick="navigateToGame_v12('gameAdivinaPlanet_v12')" class="game-hub-card p-6 rounded-xl cursor-pointer text-center">
+                    <div class="text-6xl mb-3">🛸</div> <h3 class="text-2xl font-bold">Adivina el Planeta</h3> <p class="text-sm opacity-80">¿Puedes reconocer el planeta por su pista?</p>
+                </div>
+                <div onclick="navigateToGame_v12('gameOrdenaPlanetas_v12')" class="game-hub-card p-6 rounded-xl cursor-pointer text-center" style="background: linear-gradient(to right bottom, #34D399, #A7F3D0); color:#065f46;">
+                     <div class="text-6xl mb-3">🔢</div> <h3 class="text-2xl font-bold">Ordena los Planetas</h3> <p class="text-sm opacity-80">Colócalos en su lugar correcto desde el Sol.</p>
+                </div>
+                 <div onclick="navigateToGame_v12('gameMemoryEspacial_v12')" class="game-hub-card p-6 rounded-xl cursor-pointer text-center" style="background: linear-gradient(to right bottom, #fbbf24, #f97316); color:#7c2d12;">
+                    <div class="text-6xl mb-3">🧠</div> <h3 class="text-2xl font-bold">Memory Espacial</h3> <p class="text-sm opacity-80">Encuentra los pares de objetos cósmicos.</p>
+                </div>
+                <div onclick="navigateToGame_v12('gameCreaConstelacion_v12')" class="game-hub-card p-6 rounded-xl cursor-pointer text-center" style="background: linear-gradient(to right bottom, #7DD3FC, #F0ABFC); color:#075985;">
+                    <div class="text-6xl mb-3">🎨</div> <h3 class="text-2xl font-bold">Crea Tu Constelación</h3> <p class="text-sm opacity-80">¡Dibuja tus propias figuras en el cielo!</p>
+                </div>
+            </div>
+
+            <div id="gameAdivinaPlanet_v12" class="game-section hidden rounded-xl shadow-xl text-white relative">
+                <button onclick="closeGame_v12('gameAdivinaPlanet_v12')" class="absolute top-4 right-4 bg-white text-red-500 px-3 py-1 rounded-full text-sm font-bold z-10">&times; Volver</button>
+                <h3 class="text-3xl font-bold text-center mb-6">Adivina el Planeta 🛸</h3>
+                <div id="planetClue_v12" class="game-question-text mb-6 text-center p-4 bg-black bg-opacity-20 rounded-lg min-h-[6rem]"></div>
+                <div class="text-center text-6xl mb-6 h-24" id="mysteryPlanetVisual_v12">❓</div>
+                <div id="planetOptions_v12" class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                <div id="planetGuessResult_v12" class="game-feedback mt-6"></div>
+                <button onclick="nextPlanetGuessQuestion_v12()" class="w-full mt-8 bg-yellow-300 hover:bg-yellow-400 text-slate-800 font-bold py-3 px-6 rounded-lg text-xl transition-transform hover:scale-105">Siguiente Pista</button>
+            </div>
+
+            <div id="gameOrdenaPlanetas_v12" class="game-section hidden rounded-xl shadow-xl text-white relative">
+                <button onclick="closeGame_v12('gameOrdenaPlanetas_v12')" class="absolute top-4 right-4 bg-white text-emerald-500 px-3 py-1 rounded-full text-sm font-bold z-10">&times; Volver</button>
+                <h3 class="text-3xl font-bold text-center mb-6">¡Ordenemos los Planetas! 🔢</h3>
+                <p class="text-center text-lg mb-4">Haz clic en los planetas en el orden correcto, desde el más cercano al Sol hasta el más lejano.</p>
+                <div id="planetOrderOptionsContainer_v12" class="flex flex-wrap gap-3 md:gap-4 justify-center mb-6 min-h-[5rem]"></div>
+                <p class="text-center font-semibold text-xl mb-2">Tu orden:</p>
+                <div id="userPlanetOrder_v12" class="min-h-[4rem] bg-black bg-opacity-20 border-2 border-dashed border-slate-400 rounded-lg p-3 flex flex-wrap gap-3 justify-center items-center mb-6"></div>
+                <div id="planetOrderResult_v12" class="game-feedback mt-6"></div>
+                <button onclick="resetPlanetOrderGame_v12()" class="w-full mt-8 bg-sky-300 hover:bg-sky-400 text-slate-800 font-bold py-3 px-6 rounded-lg text-xl transition-transform hover:scale-105">Reiniciar Orden</button>
+            </div>
+            
+            <div id="gameMemoryEspacial_v12" class="game-section hidden rounded-xl shadow-xl text-white relative">
+                <button onclick="closeGame_v12('gameMemoryEspacial_v12')" class="absolute top-4 right-4 bg-white text-orange-600 px-3 py-1 rounded-full text-sm font-bold z-10">&times; Volver</button>
+                <h3 class="text-3xl font-bold text-center mb-4">Memory Espacial 🧠</h3>
+                <div class="flex justify-around items-center mb-4 text-lg font-semibold">
+                    <p>Intentos: <span id="memoryAttempts_v12">0</span></p>
+                    <p>Pares Encontrados: <span id="memoryMatches_v12">0</span></p>
+                </div>
+                <div id="memoryGrid_v12" class="memory-grid">
+                    </div>
+                <p id="memoryWinMessage_v12" class="game-feedback mt-4 text-2xl text-yellow-300"></p>
+                <button onclick="resetMemoryGame_v12()" class="w-full mt-6 bg-orange-300 hover:bg-orange-400 text-slate-800 font-bold py-3 px-6 rounded-lg text-xl transition-transform hover:scale-105">Reiniciar Juego</button>
+            </div>
+
+            <div id="gameCreaConstelacion_v12" class="game-section hidden rounded-xl shadow-xl text-slate-800 relative">
+                <button onclick="closeGame_v12('gameCreaConstelacion_v12')" class="absolute top-4 right-4 bg-white text-sky-500 px-3 py-1 rounded-full text-sm font-bold z-10">&times; Volver</button>
+                <h3 class="text-3xl font-bold text-center mb-2 text-sky-700">¡Crea Tu Propia Constelación! 🎨</h3>
+                <p class="text-center text-sm mb-4 text-slate-600">Haz clic en el lienzo para poner estrellas. Luego, selecciona "Conectar Estrellas" y haz clic en dos estrellas para unirlas.</p>
+                <div class="flex flex-wrap justify-center gap-2 my-3">
+                    <button id="addStarModeBtn_v12" class="creator-tool-button active">Agregar Estrella ⭐</button>
+                    <button id="connectStarsModeBtn_v12" class="creator-tool-button">Conectar Estrellas 🔗</button>
+                    <button id="undoBtnCreator_v12" class="creator-tool-button">Deshacer↩️</button>
+                    <button id="clearBtnCreator_v12" class="creator-tool-button">Limpiar Todo 🗑️</button>
+                    <button id="downloadConstellationBtn_v12" class="creator-tool-button bg-green-500 text-white hover:bg-green-600">Descargar Constelación 🖼️</button>
+                </div>
+                <div class="w-full max-w-2xl mx-auto aspect-[4/3] sm:aspect-[16/9] md:aspect-[2/1] lg:aspect-[4/3] border border-slate-300 rounded-md bg-gray-100"> 
+                     <canvas id="creatorCanvas_v12" class="w-full h-full"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <input type="text" id="constellationNameInput_v12" placeholder="Nombre de tu constelación" class="p-2 border border-sky-400 rounded-md">
+                    <p id="creatorMessage_v12" class="text-sm text-sky-600 mt-2"></p>
+                </div>
+            </div>
+
+             <div class="flex justify-between absolute bottom-10 left-10 right-10 mt-10" id="activitiesNavButtons_v12">
+                <button onclick="navigateToSection_v12('masAlla_v12')" class="section-nav-button px-4 py-2 rounded-lg text-lg">&larr; Estrellas</button>
+                <button onclick="navigateToSection_v12('despedida_v12')" class="section-nav-button px-4 py-2 rounded-lg text-lg">Siguiente: Adiós &rarr;</button>
+            </div>
+        </section>
+
+        <section id="despedida_v12" class="section-content hidden min-h-screen flex flex-col items-center justify-center text-center space-bg-deep text-white p-6 rounded-lg shadow-2xl relative">
+            <div id="despedidaParticles_v12" class="absolute inset-0"></div> 
+            <div class="z-10">
+                <h2 class="text-5xl md:text-7xl section-title text-sky-300">¡Hasta la Próxima Aventura, Astroexplorador! 🌟</h2>
+                <p class="mt-6 text-xl md:text-2xl text-slate-200">¡Gracias por este increíble viaje espacial! Soy Ezequiel Velasquez Jeandet y ha sido un placer guiarlos. Sigan mirando las estrellas, preguntando y soñando en grande. El universo los espera.</p>
+                <div id="farewellRocketContainer_v12" class="mt-10 text-7xl md:text-9xl cursor-pointer rocket-animation hover:animate-pulse">🛰️</div>
+                 <button onclick="launchFarewellRocket_v12()" class="mt-8 px-8 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-2xl shadow-lg transition-transform hover:scale-110 ring-2 ring-amber-300 hover:ring-4">
+                    ¡BUEN VIAJE DE REGRESO!
+                </button>
+                <p id="farewellMessage_v12" class="mt-4 text-md text-slate-400"></p>
+            </div>
+             <button onclick="navigateToSection_v12('actividades_hub_v12')" class="section-nav-button absolute bottom-10 left-10 px-4 py-2 rounded-lg text-lg">&larr; Juegos</button>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 bg-slate-800 text-slate-400">
+        <p>&copy; 2025 Astro Aprendizaje para Todos. Idea original y guía por Ezequiel Velasquez Jeandet.</p>
+    </footer>
+
+    <script>
+    // --- Basic Navigation & Setup (v12) ---
+    // (Largely same as v11, ensuring _v12 suffixes)
+    const sections_v12 = document.querySelectorAll('.section-content');
+    const navButtons_v12 = document.querySelectorAll('#mainNavLinks_v12 button');
+    let currentVisibleSection_v12 = 'intro_v12';
+
+    function navigateToSection_v12(sectionId) { 
+        sections_v12.forEach(sec => {
+            const isTarget = sec.id === sectionId; sec.classList.toggle('hidden', !isTarget);
+            if (isTarget) {
+                 sec.classList.add('animate-fade-in');
+                 if (sectionId === 'gameCreaConstelacion_v12' || (sectionId === 'actividades_hub_v12' && !document.getElementById('gameCreaConstelacion_v12').classList.contains('hidden'))) { setTimeout(setupCreatorCanvas_v12, 100); } 
+                 else if (sectionId === 'masAlla_v12') { setTimeout(renderConstellationInfoCards_v12, 50); } 
+                 else if (sectionId === 'gameMemoryEspacial_v12' || (sectionId === 'actividades_hub_v12' && !document.getElementById('gameMemoryEspacial_v12').classList.contains('hidden'))) { setTimeout(memoryGame_v12.init, 50); }
+            }
+        });
+        navButtons_v12.forEach(btn => { btn.classList.toggle('active', btn.dataset.target === sectionId); });
+        currentVisibleSection_v12 = sectionId; window.scrollTo({ top: 0, behavior: 'smooth' });
+        const gameHub = document.getElementById('actividades_hub_v12'); const activitiesNavButtonsContainer = document.getElementById('activitiesNavButtons_v12');
+        const gameSections = document.querySelectorAll('.game-section'); const gameHubCardsContainer = document.querySelector('#actividades_hub_v12 > div.grid');
+        if (sectionId.startsWith('game')) { 
+            if (gameHub) gameHub.classList.remove('hidden'); if (gameHubCardsContainer) gameHubCardsContainer.classList.add('hidden'); 
+            if (activitiesNavButtonsContainer) activitiesNavButtonsContainer.classList.add('hidden'); 
+            gameSections.forEach(gs => gs.classList.toggle('hidden', gs.id !== sectionId));
+             if (sectionId === 'gameCreaConstelacion_v12') { setTimeout(setupCreatorCanvas_v12, 100); }
+             else if (sectionId === 'gameMemoryEspacial_v12') { setTimeout(memoryGame_v12.init, 50); }
+        } else { 
+            gameSections.forEach(gs => gs.classList.add('hidden')); if (gameHubCardsContainer) gameHubCardsContainer.classList.remove('hidden'); 
+            if (sectionId === 'actividades_hub_v12' && activitiesNavButtonsContainer) { activitiesNavButtonsContainer.classList.remove('hidden'); }
+        }
+    }
+    navButtons_v12.forEach(button => { button.addEventListener('click', () => navigateToSection_v12(button.dataset.target)); });
+    const headerTitle_v12 = document.getElementById('headerTitle_v12'); 
+    if(headerTitle_v12) { headerTitle_v12.addEventListener('click', () => navigateToSection_v12('intro_v12')); }
+
+    function navigateToGame_v12(gameId) { /* ... same as v11 ... */ 
+        const gameHubCardsContainer = document.querySelector('#actividades_hub_v12 > div.grid');
+        const activitiesNavButtonsContainer = document.getElementById('activitiesNavButtons_v12');
+        if(gameHubCardsContainer) gameHubCardsContainer.classList.add('hidden'); if(activitiesNavButtonsContainer) activitiesNavButtonsContainer.classList.add('hidden');
+        document.querySelectorAll('.game-section').forEach(gs => {
+            gs.classList.toggle('hidden', gs.id !== gameId);
+            if (gs.id === gameId) { gs.style.position = 'relative'; 
+                if (gameId === 'gameCreaConstelacion_v12') { setTimeout(setupCreatorCanvas_v12, 100); }
+                else if (gameId === 'gameMemoryEspacial_v12') { setTimeout(memoryGame_v12.init, 50); }
+            }
+        });
+    }
+    function closeGame_v12(gameId) { /* ... same as v11 ... */ 
+        document.getElementById(gameId).classList.add('hidden');
+        const gameHubCardsContainer = document.querySelector('#actividades_hub_v12 > div.grid');
+        const activitiesNavButtonsContainer = document.getElementById('activitiesNavButtons_v12');
+        if(gameHubCardsContainer) gameHubCardsContainer.classList.remove('hidden'); if(activitiesNavButtonsContainer) activitiesNavButtonsContainer.classList.remove('hidden');
+    }
+    function createParticles_v12(containerId, count = 50, interactive = false) { /* ... same as v11 ... */ 
+        const container = document.getElementById(containerId); if (!container) return; container.innerHTML = ''; 
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('div'); p.className = 'particle';
+            const size = Math.random() * 3 + 1; p.style.width = `${size}px`; p.style.height = p.style.width;
+            p.style.left = `${Math.random() * 100}%`; p.style.top = `${Math.random() * 100}%`;
+            p.style.animationDuration = `${Math.random() * 5 + 4}s`; p.style.animationDelay = `${Math.random() * 4}s`;
+            if (interactive) {
+                p.style.pointerEvents = 'auto'; 
+                p.addEventListener('click', (e) => {
+                    e.stopPropagation(); p.style.animation = 'sparkle-click 0.5s ease-out forwards';
+                    setTimeout(() => { p.style.animation = ''; void p.offsetWidth; p.style.animation = `sparkle ${Math.random() * 5 + 4}s linear ${Math.random() * 4}s infinite`; }, 500);
+                });
+            } else { p.style.pointerEvents = 'none'; }
+            container.appendChild(p);
+        }
+    }
+    const mainPageTitle_v12 = document.getElementById('mainPageTitle_v12');
+    if(mainPageTitle_v12){ /* ... same as v11 ... */ 
+        mainPageTitle_v12.addEventListener('mouseenter', () => mainPageTitle_v12.style.textShadow = '0 0 15px rgba(129, 201, 255, 0.9)');
+        mainPageTitle_v12.addEventListener('mouseleave', () => mainPageTitle_v12.style.textShadow = '0 0 10px rgba(129, 201, 255, 0.7)');
+    }
+    const rocket_v12 = document.getElementById('rocketContainer_v12');
+    let rocketLaunched_v12 = false;
+    function launchRocket_v12() { /* ... same as v11 ... */ 
+        if (!rocketLaunched_v12) { rocket_v12.style.transform = 'translateY(-300px) rotate(15deg) scale(0.4)'; rocket_v12.style.opacity = '0'; document.getElementById('rocketMessage_v12').textContent = '¡Rumbo a las estrellas!'; rocketLaunched_v12 = true; setTimeout(() => { rocket_v12.style.transform = 'translateY(0) rotate(0deg) scale(1)'; rocket_v12.style.opacity = '1'; rocketLaunched_v12 = false; document.getElementById('rocketMessage_v12').textContent = '(Haz clic en el cohete o el botón para iniciar la aventura)'; }, 3000); }
+    }
+    if(rocket_v12) rocket_v12.addEventListener('click', launchRocket_v12);
+
+    // --- Celestial Bodies (Vecindario Cósmico v12) ---
+    const celestialBodiesData_v12 = [ /* ... same as v11 ... */ 
+        { id: "sol", name: "El Sol", icon: "☀️", text: "Nuestra estrella gigante. ¡Nos da luz y calor para vivir!", extraFact: "¡Dentro del Sol cabrían más de 1.3 millones de Tierras! Es enorme.", className:"planet-sol"}, { id: "mercurio", name: "Mercurio", icon: "☄️", text: "El más rápido y cercano al Sol. ¡Un día allí es muy caliente y la noche muy fría!", extraFact: "No tiene lunas. ¡Y un año en Mercurio dura solo 88 días terrestres!", className:"planet-mercurio"}, { id: "venus", name: "Venus", icon: "✨", text: "Brilla mucho y es el planeta más caliente, ¡incluso más que Mercurio! Gira al revés.", extraFact: "Se le llama la 'estrella de la mañana' o 'de la tarde' por lo brillante que es.", className:"planet-venus"}, { id: "tierra", name: "Tierra", icon: "🌍", text: "¡Nuestro hogar! Lleno de vida, agua y colores azul y verde.", extraFact: "Es el único planeta que conocemos con chocolate y astronautas curiosos.", className:"planet-tierra"}, { id: "luna", name: "La Luna", icon: "🌕", text: "Nuestra amiga nocturna. No tiene luz propia, refleja la del Sol.", extraFact: "¡Podemos ver sus cráteres (agujeros) hechos por meteoritos!", className:"planet-luna"}, { id: "marte", name: "Marte", icon: "🔴", text: "El planeta rojo. Tiene el volcán más grande del Sistema Solar: el Monte Olimpo.", extraFact: "Los científicos buscan si hubo vida allí. ¡Quizás haya marcianitos microscópicos!", className:"planet-marte"}, { id: "jupiter", name: "Júpiter", icon: "🌪️", text: "¡El gigante gaseoso! Es tan grande que todos los demás planetas cabrían dentro.", extraFact: "Tiene una Gran Mancha Roja, ¡una tormenta más grande que la Tierra que dura siglos!", className:"planet-jupiter"}, { id: "saturno", name: "Saturno", icon: "🪐", text: "Famoso por sus anillos espectaculares, hechos de hielo y roca.", extraFact: "¡Si tuvieras una piscina gigante, Saturno flotaría porque es muy ligero!", className:"planet-saturno"}, { id: "urano", name: "Urano", icon: "🧊", text: "Un gigante de hielo que gira 'acostado' de lado. ¡Y es muy, muy frío!", extraFact: "Tiene anillos delgados y oscuros, difíciles de ver.", className:"planet-urano"}, { id: "neptuno", name: "Neptuno", icon: "🌊", text: "El gigante azul más lejano (de los planetas principales). Tiene vientos ¡superveloces!", extraFact: "Es tan azul por un gas llamado metano en su atmósfera.", className:"planet-neptuno"}
+    ];
+    const bodiesContainer_v12 = document.getElementById('celestialBodiesContainer_v12');
+    const modal_v12 = document.getElementById('celestialBodyDetailModal_v12');
+    if (bodiesContainer_v12 && modal_v12) { /* ... same as v11 ... */ 
+        celestialBodiesData_v12.forEach(body => { const card = document.createElement('div'); card.className = 'celestial-body-card-v12 p-4 text-center rounded-xl cursor-pointer'; const visualContainer = document.createElement('div'); visualContainer.className = `planet-card-visual ${body.className}`; visualContainer.innerHTML = `<div class="landmass"></div><div class="clouds"></div><div class="polar-cap"></div><div class="band-1"></div><div class="band-2"></div><div class="great-red-spot"></div><div class="rings"></div><div class="rings-faint"></div><div class="dark-spot"></div>`; card.appendChild(visualContainer); card.innerHTML += `<h3 class="planet-name">${body.name}</h3><p class="planet-text-preview">${body.text}</p>`; card.onclick = () => openModal_v12(body); bodiesContainer_v12.appendChild(card); });
+    }
+    function openModal_v12(body) { /* ... same as v11 ... */
+        document.getElementById('modalTitle_v12').textContent = body.name; const modalImageEl = document.getElementById('modalImage_v12'); modalImageEl.className = `planet-visual-box ${body.className}`; document.getElementById('modalText_v12').textContent = body.text; const extraFactEl = document.getElementById('modalExtraFact_v12'); extraFactEl.textContent = body.extraFact; extraFactEl.classList.add('hidden'); document.getElementById('modalExtraFactButton_v12').classList.remove('hidden'); document.getElementById('modalInteractionHint_v12').textContent = `Haz clic en la imagen de ${body.name} para una pequeña sorpresa.`; modal_v12.classList.remove('hidden'); modalImageEl.onclick = () => { modalImageEl.style.transition = 'transform 0.3s ease'; modalImageEl.style.transform = 'scale(1.15) rotate(10deg)'; setTimeout(() => { modalImageEl.style.transform = 'scale(1) rotate(0deg)'; }, 300); };
+     }
+    function closeModal_v12() { modal_v12.classList.add('hidden'); }
+    function revealExtraFact_v12() { /* ... same as v11 ... */ document.getElementById('modalExtraFact_v12').classList.remove('hidden'); document.getElementById('modalExtraFactButton_v12').classList.add('hidden'); }
+
+    // --- Interactive Stars (Más Allá v12) ---
+    const interactiveStarsContainer_v12 = document.getElementById('interactiveStarsContainer_v12');
+    if (interactiveStarsContainer_v12) { /* ... same as v11 ... */ 
+         for (let i = 0; i < 30; i++) { const star = document.createElement('div'); const size = Math.random() * 22 + 8; star.innerHTML = ['✦', '✧', '★', '☆'][Math.floor(Math.random()*4)]; star.className = 'absolute cursor-pointer transition-all duration-300 ease-in-out hover:opacity-100 opacity-70'; star.style.fontSize = `${size}px`; star.style.left = `${Math.random() * 90 + 5}%`; star.style.top = `${Math.random() * 90 + 5}%`; const hue = Math.random() * 60 + 200; star.style.color = `hsl(${hue}, 100%, ${Math.random() * 40 + 60}%)`; star.style.textShadow = `0 0 ${size/2}px hsla(${hue}, 100%, 70%, 0.7)`; star.onclick = (e) => { e.stopPropagation(); const newHue = Math.random() * 360; star.style.color = `hsl(${newHue}, 100%, 70%)`; star.style.transform = `scale(${Math.random() * 0.7 + 1.5}) rotate(${Math.random() * 180 - 90}deg) translateZ(0)`; star.style.textShadow = `0 0 ${size/1.5}px hsla(${newHue}, 100%, 70%, 0.9)`; setTimeout(()=> star.style.transform = 'scale(1) rotate(0deg)', 300); }; interactiveStarsContainer_v12.appendChild(star); }
+    }
+    
+    // --- Constellations Info Cards (Más Allá v12) ---
+    const constellationInfoData_v12 = { /* ... same as v11 ... */
+        osaMayor: { name: "Osa Mayor (El Carro)", symbol: "🐻", description: "La Osa Mayor es muy famosa porque siete de sus estrellas forman 'El Carro' o 'El Cucharón'. Es fácil de ver en el hemisferio norte. Si sigues la línea de las dos estrellas del borde del 'cucharón' (Merak y Dubhe), ¡puedes encontrar la Estrella Polar, que siempre señala al Norte!", funFact: "La Estrella Polar es en realidad parte de la Osa Menor, ¡la 'hermana' pequeña de la Osa Mayor!" }, orion: { name: "Orión, el Cazador", symbol: "⚔️", description: "Orión es una de las constelaciones más brillantes y reconocibles, visible en todo el mundo. Busca su famoso 'Cinturón de Orión': tres estrellas brillantes muy juntas en línea recta (Alnitak, Alnilam y Mintaka). Debajo del cinturón, puedes ver su 'espada', que incluye la Gran Nebulosa de Orión, ¡una fábrica de estrellas! Orión parece un gran cazador con hombros (Betelgeuse y Bellatrix) y rodillas/pies (Rigel y Saiph).", funFact: "¡Betelgeuse es una estrella supergigante roja tan grande que si estuviera en el lugar de nuestro Sol, se tragaría a Marte!" }, leo: { name: "Leo, el León ♌", symbol: "♌", description: "Leo representa a un león majestuoso. Su cabeza y melena forman un arco de estrellas que parece un signo de interrogación (o una hoz) al revés. La estrella más brillante es Régulo, conocida como el 'corazón del león'. Es una constelación del zodiaco que se ve mejor en primavera (hemisferio norte).", funFact: "En la mitología griega, Leo era el terrible León de Nemea, cuya piel era impenetrable y fue derrotado por Hércules como uno de sus doce trabajos." }, taurus: { name: "Tauro, el Toro ♉", symbol: "♉", description: "Tauro es otra constelación del zodiaco, que representa a un toro embistiendo. Su forma más visible es una 'V' de estrellas que forman la cara del toro (el cúmulo de las Híades), con la brillante estrella Aldebarán como su ojo rojo. Cerca de Tauro se encuentra el famoso cúmulo estelar de las Pléyades, también conocidas como las 'Siete Hermanas'.", funFact: "Las Pléyades, aunque a simple vista parecen unas 6 o 7 estrellas, ¡en realidad contienen cientos de estrellas jóvenes y calientes envueltas en una nebulosa azul!" }, geminis: { name: "Géminis, los Gemelos ♊", symbol: "♊", description: "Géminis representa a los gemelos Cástor y Pólux de la mitología. Sus dos estrellas más brillantes llevan estos nombres y marcan las cabezas de los gemelos. Desde estas 'cabezas', dos líneas de estrellas más débiles se extienden hacia abajo, como los cuerpos de los gemelos. Es una constelación del zodiaco visible en invierno (hemisferio norte).", funFact: "Aunque se les llama gemelos, Pólux es una estrella gigante naranja y es más brillante que Cástor, que es en realidad un fascinante sistema de ¡seis estrellas unidas por la gravedad!" },
+    };
+    function renderConstellationInfoCards_v12() { /* ... same as v11 ... */
+        const container = document.getElementById('constellationInfoCardsContainer_v12'); if (!container) return; container.innerHTML = ''; 
+        Object.keys(constellationInfoData_v12).forEach(key => {
+            const data = constellationInfoData_v12[key]; const card = document.createElement('div'); card.className = 'constellation-info-card';
+            card.innerHTML = `<h4 class="flex items-center justify-center"><span class="constellation-symbol">${data.symbol || '✨'}</span>${data.name}</h4><p>${data.description}</p><p><strong>Dato Curioso:</strong> ${data.funFact}</p>`;
+            container.appendChild(card);
+        });
+    }
+
+    // --- Game Logic (v12) --- (IDs changed to _v12)
+    // Game 1: Adivina el Planeta v12 (Same as v11)
+    const planetGuessGame_v12 = { /* ... same as v11 ... */ 
+        questions: [ { clue: "Soy rojo como un tomate y tengo el volcán más alto. A veces me visitan robots.", answer: "Marte", visual: "🔴<div class='text-sm'>🌋?</div>", options: ["Júpiter", "Marte", "Venus"] }, { clue: "Soy el más grande de todos, ¡un gigante con una mancha que es una tormenta!", answer: "Júpiter", visual: "🌪️<div class='text-sm'>XXL</div>", options: ["Saturno", "Tierra", "Júpiter"] }, { clue: "Me conocen por mis anillos brillantes hechos de hielo. ¡Soy muy elegante!", answer: "Saturno", visual: "🪐<div class='text-sm'>💍✨</div>", options: ["Urano", "Saturno", "Neptuno"] }, { clue: "Estoy más cerca del Sol que nadie y soy muy veloz. ¡Hace mucho calor!", answer: "Mercurio", visual: "☄️<div class='text-sm'>🔥</div>", options: ["Mercurio", "Venus", "Tierra"] }, { clue: "Soy el hogar de todos ustedes, lleno de agua y vida. ¡Cuídenme mucho!", answer: "Tierra", visual: "🌍<div class='text-sm'>💙💚</div>", options: ["Marte", "Venus", "Tierra"] }, { clue: "Giro de lado, como si estuviera acostado, y soy un gigante de hielo muy frío.", answer: "Urano", visual: "🧊<div class='text-sm'>😴</div>", options: ["Neptuno", "Urano", "Saturno"] }, { clue: "Soy el planeta más azul y tengo los vientos más fuertes del sistema solar.", answer: "Neptuno", visual: "🌊<div class='text-sm'>💨</div>", options: ["Júpiter", "Urano", "Neptuno"] }, { clue: "Acompaño a la Tierra todas las noches y tengo muchos cráteres.", answer: "La Luna", visual: "🌕<div class='text-sm'>🌙</div>", options: ["Venus", "La Luna", "Mercurio"] }, { clue: "Soy una estrella enorme y brillante en el centro de nuestro sistema.", answer: "El Sol", visual: "☀️<div class='text-sm'>🔥</div>", options: ["Júpiter", "El Sol", "Venus"] } ], currentQuestionIndex: 0,
+        init: function() { this.renderQuestion(); },
+        renderQuestion: function() { 
+            const q = this.questions[this.currentQuestionIndex]; document.getElementById('planetClue_v12').textContent = q.clue;
+            document.getElementById('mysteryPlanetVisual_v12').innerHTML = `<div class="text-8xl animate-bounce">${q.visual}</div>`;
+            const optionsContainer = document.getElementById('planetOptions_v12'); optionsContainer.innerHTML = '';
+            q.options.forEach(opt => { const btn = document.createElement('button'); btn.textContent = opt; btn.className = 'game-option-button'; btn.onclick = () => this.checkAnswer(opt); optionsContainer.appendChild(btn); });
+            document.getElementById('planetGuessResult_v12').innerHTML = '';
+        },
+        checkAnswer: function(selectedOption) { 
+            const q = this.questions[this.currentQuestionIndex]; const resultEl = document.getElementById('planetGuessResult_v12');
+            const planetData = celestialBodiesData_v12.find(p=>p.name === q.answer);
+            const correctVisual = planetData ? `<div class="text-8xl text-green-300">${planetData.icon}</div>` : `<div class="text-8xl text-green-300">${q.visual}</div>`;
+            if (selectedOption === q.answer) { resultEl.innerHTML = `<div class="bg-green-500 text-white p-3 rounded-lg">¡Correcto! Es ${q.answer}. ¡Eres un genio espacial! 🥳</div>`; document.getElementById('mysteryPlanetVisual_v12').innerHTML = correctVisual; } 
+            else { resultEl.innerHTML = `<div class="bg-red-500 text-white p-3 rounded-lg">Oh no... La respuesta era ${q.answer}. ¡Sigue intentando! 🤔</div>`; }
+        },
+        next: function() { this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.questions.length; this.renderQuestion(); }
+    };
+    function nextPlanetGuessQuestion_v12() { planetGuessGame_v12.next(); }
+
+    // Game 2: Ordena los Planetas v12 (Same as v11)
+    const planetOrderGame_v12 = { /* ... same as v11 ... */ 
+        correctOrder: ["Mercurio", "Venus", "Tierra", "Marte", "Júpiter", "Saturno", "Urano", "Neptuno"],
+        planets: celestialBodiesData_v12.filter(p => p.name !== "El Sol" && p.name !== "La Luna" ).map(p => ({name: p.name, icon: p.icon})), userSelection: [],
+        init: function() { this.shuffleOptions(); this.renderOptions(); this.renderSelection(); document.getElementById('planetOrderResult_v12').innerHTML = ''; },
+        shuffleOptions: function() { this.shuffledPlanets = [...this.planets].sort(() => Math.random() - 0.5); },
+        renderOptions: function() {
+            const container = document.getElementById('planetOrderOptionsContainer_v12'); container.innerHTML = '';
+            this.shuffledPlanets.forEach(planet => { if (!this.userSelection.find(p=>p.name === planet.name)) { const el = document.createElement('div'); el.className = 'planet-order-option-v12 text-center transform hover:scale-110'; el.innerHTML = `<div class="text-4xl">${planet.icon}</div><div>${planet.name}</div>`; el.onclick = () => this.selectPlanet(planet); container.appendChild(el); } });
+        },
+        renderSelection: function() {
+            const container = document.getElementById('userPlanetOrder_v12'); container.innerHTML = '';
+            this.userSelection.forEach(planet => { const el = document.createElement('div'); el.className = 'selected-order-item-v12 p-2 rounded-md text-center'; el.innerHTML = `<div class="text-2xl">${planet.icon}</div><div class="text-xs">${planet.name}</div>`; container.appendChild(el); });
+        },
+        selectPlanet: function(planet) { if (this.userSelection.length < this.correctOrder.length) { this.userSelection.push(planet); this.renderOptions(); this.renderSelection(); if (this.userSelection.length === this.correctOrder.length) this.checkOrder(); } },
+        checkOrder: function() { const userOrderNames = this.userSelection.map(p => p.name); const isCorrect = JSON.stringify(userOrderNames) === JSON.stringify(this.correctOrder); const resultEl = document.getElementById('planetOrderResult_v12'); resultEl.innerHTML = isCorrect ? '<div class="bg-green-500 text-white p-3 rounded-lg">¡Increíble! ¡Orden perfecto! Eres un maestro del Sistema Solar. 🌠</div>' : '<div class="bg-red-500 text-white p-3 rounded-lg">Ups, ese no es el orden. ¡Pero no te rindas, puedes intentarlo de nuevo! 🤔</div>'; },
+        reset: function() { this.userSelection = []; this.init(); }
+    };
+    function resetPlanetOrderGame_v12() { planetOrderGame_v12.reset(); }
+    
+    // Game 3: Memory Espacial v12 (Same as v11)
+    const memoryGame_v12 = { /* ... same as v11 ... */ 
+        items: [ { id: 'rocket', content: '🚀' }, { id: 'saturn', content: '🪐' }, { id: 'star', content: '⭐' }, { id: 'moon', content: '🌕' }, { id: 'alien', content: '👽' }, { id: 'telescope', content: '🔭' }, { id: 'comet', content: '☄️' }, { id: 'earth', content: '🌍' } ],
+        gridEl: null, cards: [], flippedCards: [], matchedPairs: 0, attempts: 0, canFlip: true, attemptsDisplayEl: null, matchesDisplayEl: null, winMessageDisplayEl: null,
+        init: function() { this.gridEl = document.getElementById('memoryGrid_v12'); this.attemptsDisplayEl = document.getElementById('memoryAttempts_v12'); this.matchesDisplayEl = document.getElementById('memoryMatches_v12'); this.winMessageDisplayEl = document.getElementById('memoryWinMessage_v12'); this.resetGame(); },
+        resetGame: function() {
+            if (!this.gridEl) return; this.gridEl.innerHTML = ''; this.cards = []; this.flippedCards = []; this.matchedPairs = 0; this.attempts = 0; this.canFlip = true;
+            if (this.attemptsDisplayEl) this.attemptsDisplayEl.textContent = '0'; if (this.matchesDisplayEl) this.matchesDisplayEl.textContent = '0'; if (this.winMessageDisplayEl) this.winMessageDisplayEl.textContent = '';
+            let gameItems = [...this.items, ...this.items]; this.shuffleArray(gameItems);
+            gameItems.forEach(item => {
+                const card = document.createElement('div'); card.classList.add('memory-card'); card.dataset.id = item.id;
+                const cardFaceFront = document.createElement('div'); cardFaceFront.classList.add('card-face', 'card-front'); cardFaceFront.textContent = item.content;
+                const cardFaceBack = document.createElement('div'); cardFaceBack.classList.add('card-face', 'card-back'); cardFaceBack.textContent = '🌌';
+                card.appendChild(cardFaceBack); card.appendChild(cardFaceFront); card.addEventListener('click', () => this.flipCard(card));
+                this.gridEl.appendChild(card); this.cards.push(card);
+            });
+        },
+        shuffleArray: function(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } },
+        flipCard: function(card) { if (!this.canFlip || card.classList.contains('is-flipped') || card.classList.contains('is-matched')) return; card.classList.add('is-flipped'); this.flippedCards.push(card); if (this.flippedCards.length === 2) { this.attempts++; if(this.attemptsDisplayEl) this.attemptsDisplayEl.textContent = this.attempts; this.canFlip = false; this.checkForMatch(); } },
+        checkForMatch: function() {
+            const [card1, card2] = this.flippedCards;
+            if (card1.dataset.id === card2.dataset.id) {
+                this.matchedPairs++; if(this.matchesDisplayEl) this.matchesDisplayEl.textContent = this.matchedPairs; card1.classList.add('is-matched'); card2.classList.add('is-matched');
+                this.flippedCards = []; this.canFlip = true; if (this.matchedPairs === this.items.length) { if(this.winMessageDisplayEl) this.winMessageDisplayEl.textContent = `¡Felicidades! ¡Encontraste todos los pares en ${this.attempts} intentos! 🎉`; }
+            } else { setTimeout(() => { card1.classList.remove('is-flipped'); card2.classList.remove('is-flipped'); this.flippedCards = []; this.canFlip = true; }, 1200); }
+        }
+    };
+    function resetMemoryGame_v12() { memoryGame_v12.resetGame(); }
+
+    // Game 4: Crea Tu Constelación v12
+    const creatorCanvas_v12 = document.getElementById('creatorCanvas_v12');
+    let creatorCtx_v12;
+    let userStars_v12 = []; let userLines_v12 = [];
+    let currentCreatorMode_v12 = 'addStar'; let firstStarConnect_v12 = null;
+    let creatorHistory_v12 = [];
+
+    function setupCreatorCanvas_v12() { 
+        if (creatorCanvas_v12 && !creatorCtx_v12) { 
+            creatorCtx_v12 = creatorCanvas_v12.getContext('2d'); 
+        }
+        if (creatorCanvas_v12 && creatorCtx_v12) {
+            const parentContainer = creatorCanvas_v12.parentElement;
+            let newWidth = parentContainer.offsetWidth;
+            let newHeight = parentContainer.offsetHeight;
+
+            if (newWidth > 0 && (creatorCanvas_v12.width !== newWidth || creatorCanvas_v12.height !== newHeight) ) {
+                 creatorCanvas_v12.width = newWidth; 
+                 creatorCanvas_v12.height = newHeight;
+                 redrawCreatorCanvas_v12(); // Redraw only if size actually changed
+            } else if (creatorCanvas_v12.width === 0 && newWidth === 0) { // Fallback if parent still has no size
+                creatorCanvas_v12.width = 500; 
+                creatorCanvas_v12.height = 375; // Default to 4:3
+                redrawCreatorCanvas_v12();
+            }
+        }
+    }
+    if (creatorCanvas_v12) { 
+        document.getElementById('addStarModeBtn_v12').addEventListener('click', () => setCreatorMode_v12('addStar'));
+        document.getElementById('connectStarsModeBtn_v12').addEventListener('click', () => setCreatorMode_v12('connectStars'));
+        document.getElementById('undoBtnCreator_v12').addEventListener('click', undoCreatorAction_v12);
+        document.getElementById('clearBtnCreator_v12').addEventListener('click', clearCreatorCanvas_v12);
+        document.getElementById('downloadConstellationBtn_v12').addEventListener('click', downloadUserConstellation_v12);
+        creatorCanvas_v12.addEventListener('click', handleCreatorCanvasClick_v12);
+     }
+    function setCreatorMode_v12(mode) { 
+        currentCreatorMode_v12 = mode; firstStarConnect_v12 = null;
+        document.getElementById('addStarModeBtn_v12').classList.toggle('active', mode === 'addStar');
+        document.getElementById('connectStarsModeBtn_v12').classList.toggle('active', mode === 'connectStars');
+        document.getElementById('creatorMessage_v12').textContent = mode === 'addStar' ? 'Modo: Agregar Estrellas. Haz clic para poner una estrella.' : 'Modo: Conectar Estrellas. Haz clic en dos estrellas para unirlas.';
+    }
+    function handleCreatorCanvasClick_v12(event) { 
+        if(!creatorCtx_v12 || !creatorCanvas_v12) { console.error("Creator canvas context not ready."); return; }
+        
+        const rect = creatorCanvas_v12.getBoundingClientRect();
+        // Accurate coordinates relative to the canvas element's display size
+        // These are then used on the canvas drawing buffer which should match this display size
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        if (currentCreatorMode_v12 === 'addStar') {
+            const newStar = { x, y, id: Date.now() + Math.random() }; 
+            userStars_v12.push(newStar); creatorHistory_v12.push({ type: 'star', data: newStar });
+            document.getElementById('creatorMessage_v12').textContent = `¡Estrella añadida!`;
+        } else if (currentCreatorMode_v12 === 'connectStars') {
+            const clickedStar = getClickedStar_v12(x, y);
+            if (clickedStar) {
+                if (!firstStarConnect_v12) {
+                    firstStarConnect_v12 = clickedStar;
+                    document.getElementById('creatorMessage_v12').textContent = 'Primera estrella seleccionada. ¡Selecciona otra para conectar!';
+                } else {
+                    if (firstStarConnect_v12.id !== clickedStar.id) { 
+                        const lineExists = userLines_v12.some(line => (line.from.id === firstStarConnect_v12.id && line.to.id === clickedStar.id) || (line.from.id === clickedStar.id && line.to.id === firstStarConnect_v12.id));
+                        if (!lineExists) {
+                            userLines_v12.push({ from: firstStarConnect_v12, to: clickedStar });
+                            creatorHistory_v12.push({ type: 'line', data: { from: firstStarConnect_v12, to: clickedStar } });
+                            document.getElementById('creatorMessage_v12').textContent = '¡Estrellas conectadas!';
+                        } else { document.getElementById('creatorMessage_v12').textContent = 'Estas estrellas ya están conectadas.'; }
+                        firstStarConnect_v12 = null; 
+                    } else { document.getElementById('creatorMessage_v12').textContent = 'Ya seleccionaste esta estrella. Elige otra diferente.'; }
+                }
+            } else { document.getElementById('creatorMessage_v12').textContent = 'No has hecho clic cerca de una estrella. Intenta de nuevo.'; }
+        }
+        redrawCreatorCanvas_v12();
+    }
+    function getClickedStar_v12(clickX, clickY) { 
+        const starRadius = 12; 
+        for (let i = userStars_v12.length - 1; i >= 0; i--) {
+            const star = userStars_v12[i];
+            const distance = Math.sqrt((clickX - star.x)**2 + (clickY - star.y)**2);
+            if (distance < starRadius) return star;
+        }
+        return null;
+    }
+    function undoCreatorAction_v12() { /* ... same as v11 ... */ 
+        if (creatorHistory_v12.length > 0) {
+            const lastAction = creatorHistory_v12.pop();
+            if (lastAction.type === 'star') {
+                userStars_v12 = userStars_v12.filter(s => s.id !== lastAction.data.id); 
+                userLines_v12 = userLines_v12.filter(line => line.from.id !== lastAction.data.id && line.to.id !== lastAction.data.id);
+            } else if (lastAction.type === 'line') { userLines_v12.pop(); }
+            firstStarConnect_v12 = null; redrawCreatorCanvas_v12();
+            document.getElementById('creatorMessage_v12').textContent = 'Última acción deshecha.';
+        } else { document.getElementById('creatorMessage_v12').textContent = 'Nada que deshacer.'; }
+     }
+    function clearCreatorCanvas_v12() { /* ... same as v11 ... */ 
+        userStars_v12 = []; userLines_v12 = []; creatorHistory_v12 = []; firstStarConnect_v12 = null;
+        redrawCreatorCanvas_v12();
+        document.getElementById('constellationNameInput_v12').value = '';
+        document.getElementById('creatorMessage_v12').textContent = 'Lienzo limpiado. ¡Empieza una nueva constelación!';
+     }
+    function redrawCreatorCanvas_v12() { /* ... same as v11 ... */ 
+        if (!creatorCtx_v12 || !creatorCanvas_v12) return;
+        if (creatorCanvas_v12.width === 0 || creatorCanvas_v12.height === 0) { setupCreatorCanvas_v12(); if (creatorCanvas_v12.width === 0 || creatorCanvas_v12.height === 0) return; }
+        creatorCtx_v12.clearRect(0, 0, creatorCanvas_v12.width, creatorCanvas_v12.height);
+        creatorCtx_v12.fillStyle = '#0f172a'; creatorCtx_v12.fillRect(0, 0, creatorCanvas_v12.width, creatorCanvas_v12.height);
+        creatorCtx_v12.strokeStyle = 'rgba(229, 231, 235, 0.6)'; creatorCtx_v12.lineWidth = 1.5;
+        userLines_v12.forEach(line => {
+            creatorCtx_v12.beginPath(); creatorCtx_v12.moveTo(line.from.x, line.from.y); creatorCtx_v12.lineTo(line.to.x, line.to.y); creatorCtx_v12.stroke();
+        });
+        userStars_v12.forEach(star => {
+            creatorCtx_v12.fillStyle = '#FDE047'; creatorCtx_v12.shadowColor = '#FBBF24'; creatorCtx_v12.shadowBlur = 6;
+            creatorCtx_v12.beginPath(); creatorCtx_v12.arc(star.x, star.y, 4, 0, Math.PI * 2); creatorCtx_v12.fill();
+        });
+        creatorCtx_v12.shadowBlur = 0;
+        if (currentCreatorMode_v12 === 'connectStars' && firstStarConnect_v12) {
+            creatorCtx_v12.fillStyle = 'rgba(239, 68, 68, 0.4)'; 
+            creatorCtx_v12.beginPath(); creatorCtx_v12.arc(firstStarConnect_v12.x, firstStarConnect_v12.y, 8, 0, Math.PI * 2); creatorCtx_v12.fill();
+        }
+     }
+    function downloadUserConstellation_v12() { /* ... same as v11 ... */ 
+        if (creatorCanvas_v12) {
+            const constellationNameInput = document.getElementById('constellationNameInput_v12');
+            let filename = (constellationNameInput.value.trim() || 'mi_constelacion').replace(/\s+/g, '_');
+            filename = filename.replace(/[^a-zA-Z0-9_.-]/g, '') + '.png'; 
+            const dataURL = creatorCanvas_v12.toDataURL('image/png'); const link = document.createElement('a');
+            link.href = dataURL; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            document.getElementById('creatorMessage_v12').textContent = `¡Constelación "${filename}" descargada!`;
+        } else { document.getElementById('creatorMessage_v12').textContent = 'Error: No se pudo encontrar el lienzo para descargar.'; }
+    }
+
+    // --- Farewell Section (v12) ---
+    const farewellRocket_v12 = document.getElementById('farewellRocketContainer_v12');
+    let farewellRocketLaunched_v12 = false;
+    function launchFarewellRocket_v12() { /* ... same as v11 ... */ 
+         if (!farewellRocketLaunched_v12) {
+            farewellRocket_v12.style.transform = 'translateY(-400px) scale(0.2) rotate(30deg)'; farewellRocket_v12.style.opacity = '0';
+            farewellRocketLaunched_v12 = true;
+            document.getElementById('farewellMessage_v12').textContent = "¡Buen viaje y hasta la próxima exploración!";
+             setTimeout(() => { 
+                const particlesContainer = document.getElementById('despedidaParticles_v12');
+                if(particlesContainer){ Array.from(particlesContainer.childNodes).forEach((p, idx) => { if (p.style) setTimeout(() => { p.style.animation = 'sparkle-click 0.3s forwards';}, idx * 15); }); }
+            }, 1800); 
+             setTimeout(() => { 
+                farewellRocket_v12.style.transform = 'translateY(0) scale(1) rotate(0deg)'; farewellRocket_v12.style.opacity = '1';
+                farewellRocketLaunched_v12 = false; document.getElementById('farewellMessage_v12').textContent = "";
+                createParticles_v12('despedidaParticles_v12', 60, true);
+            }, 3500); 
+        }
+    }
+    if(farewellRocket_v12) farewellRocket_v12.addEventListener('click', launchFarewellRocket_v12);
+
+    // --- Debounce function for resize ---
+    function debounce_v12(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+    function setupCreatorCanvas_if_visible_v12() {
+        const creatorGameSection = document.getElementById('gameCreaConstelacion_v12');
+        if (creatorGameSection && !creatorGameSection.classList.contains('hidden')) {
+             setupCreatorCanvas_v12();
+        }
+    }
+
+    // --- Initial Load (v12) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        navigateToSection_v12('intro_v12'); 
+        createParticles_v12('introParticles_v12', 70, true); 
+        createParticles_v12('despedidaParticles_v12', 60, true); 
+        renderConstellationInfoCards_v12();
+        
+        planetGuessGame_v12.init();
+        planetOrderGame_v12.init();
+        memoryGame_v12.init(); 
+        if (creatorCanvas_v12) { setTimeout(setupCreatorCanvas_v12, 100); setCreatorMode_v12('addStar'); } // Initial setup with a slight delay
+        
+        window.addEventListener('resize', debounce_v12(setupCreatorCanvas_if_visible_v12, 200));
+
+        const animStyleSheet = document.createElement("style");
+        animStyleSheet.innerText = `@keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } } .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; } @keyframes wiggle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } } .animate-wiggle { animation: wiggle 0.5s ease-in-out infinite; }`;
+        document.head.appendChild(animStyleSheet);
+    });
+    </script>
+</body>
+</html>
